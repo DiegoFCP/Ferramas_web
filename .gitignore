@@ -1,0 +1,21 @@
+# Python
+*.pyc
+__pycache__/
+
+# Environments
+env/
+venv/
+.Venv/
+
+# Database
+db.sqlite3
+*.db
+
+# Django migrations
+*/migrations/__pycache__/
+
+# Secrets
+*.env
+
+# VSCode
+.vscode/

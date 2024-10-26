@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscar Productos - Ferramas</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    {% load static %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        h3 {
+            margin-bottom: 30px;
+        }
+
+        /* Estilos para los botones */
+        button {
+            margin: 5px;
+        }
+
+        .table th, .table td {
+            vertical-align: middle;
+        }
+
+        /* Estilo de la tabla */
+        .table th {
+            background-color: #343a40;
+            color: #fff;
+        }
+
+        .table td {
+            background-color: #fff;
+            border-color: #dee2e6;
+        }
+
+        /* Botón "Home" */
+        .home-button {
+            background-color: #6c757d;
+            color: #fff;
+            border-radius: 5px;
+        }
+
+        .home-button:hover {
+            background-color: #5a6268;
+        }
+
+        /* Estilo del formulario */
+        .search-form input[type="text"] {
+            border-radius: 50px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            width: 75%;
+        }
+
+        .search-form button {
+            border-radius: 50px;
+        }
+
+        /* Ajustes para el logo en el navbar */
+        .navbar-brand img {
+            height: 50px;
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <!-- Logo de Ferramas con redirección a la página index -->
+            <a class="navbar-brand" href="{% url 'index' %}">
+                <img src="{% static 'imgs/logo/logo.png' %}" alt="Logo Ferramas">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'lista_productos' %}">Explorar Catálogo</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Iniciar Sesión</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal de la página -->
+    <div class="container mt-5">
+        <h3 class="text-center">Catálogo de Productos</h3>
+
+        <!-- Formulario de búsqueda -->
+        <form method="GET" action="{% url 'lista_productos' %}" class="search-form text-center">
+            <input type="text" name="search" placeholder="Buscar producto por nombre" value="{{ request.GET.search }}" class="form-control d-inline-block">
+            <button type="submit" class="btn btn-primary">Buscar</button>
+            <a href="{% url 'lista_productos' %}" class="btn btn-warning">Limpiar búsqueda</a>
+        </form>
+
+        <!-- Botón para mostrar todos los productos -->
+        <div class="text-center mt-3">
+            <form method="GET" action="{% url 'lista_productos' %}">
+                <button type="submit" name="show_all" value="1" class="btn btn-success">Mostrar todos los productos</button>
+            </form>
+        </div>
+
+        <!-- Tabla de productos -->
+        <table class="table table-hover mt-4">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Precio</th>
+                    <th>Categoría</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                <tr>
+                    <td>{{ producto.nombre }}</td>
+                    <td>{{ producto.descripcion }}</td>
+                    <td>{{ producto.precio }} CLP</td>
+                    <td>
+                        {% if producto.categoria %}
+                            {{ producto.categoria.nombre }}
+                        {% else %}
+                            Sin categoría
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">No hay productos disponibles.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+      
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

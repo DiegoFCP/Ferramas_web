@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - Ferramas</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    {% load static %}
+    <style>
+        .navbar-brand img {
+            height: 50px;
+            width: auto;
+        }
+
+        /* Estilos para ajustar la imagen de Productos Ferramas */
+        .product-banner img {
+            max-width: 300px;
+            height: auto;
+            padding: 40px;
+            margin-left: 320px;  /* Empuja la imagen hacia la derecha */
+            margin-right: 0;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <!-- Logo de Ferramas -->
+            <a class="navbar-brand" href="{% url 'index' %}">
+                <img src="{% static 'imgs/logo/logo.png' %}" alt="Logo Ferramas">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'lista_productos' %}">Explorar Catálogo</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Iniciar Sesión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login_staff' %}">Staff</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'cart' %}">Carrito</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Banner principal con imagen -->
+    <div class="container mt-5">
+        <div class="row align-items-center product-banner">
+            <div class="col-md-6">
+                <h1>Bienvenido a Ferramas</h1>
+                <p>En Ferramas, encontrarás los mejores productos y herramientas para tus proyectos.</p>
+                <a href="{% url 'lista_productos' %}" class="btn btn-primary btn-lg mt-3">Explorar Catálogo</a>
+            </div>
+            <div class="col-md-6" text-end>
+                <img src="{% static 'imgs/logo/logo.png' %}" alt="Productos Ferramas" class="img-fluid">
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de destacados -->
+    <div class="container mt-5">
+        <h2 class="text-center">Nuestros Productos Destacados</h2>
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Producto 1">
+                    <div class="card-body">
+                        <h5 class="card-title">Producto 1</h5>
+                        <p class="card-text">Descripción breve del producto.</p>
+                        <a href="#" class="btn btn-primary">Ver Detalles</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Producto 2">
+                    <div class="card-body">
+                        <h5 class="card-title">Producto 2</h5>
+                        <p class="card-text">Descripción breve del producto.</p>
+                        <a href="#" class="btn btn-primary">Ver Detalles</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Producto 3">
+                    <div class="card-body">
+                        <h5 class="card-title">Producto 3</h5>
+                        <p class="card-text">Descripción breve del producto.</p>
+                        <a href="#" class="btn btn-primary">Ver Detalles</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-4 mt-5">
+        <p>&copy; 2024 Ferramas. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
