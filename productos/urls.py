@@ -9,4 +9,7 @@ urlpatterns = [
     path('cart/', views.cart, name='cart'),
     path('post_compra/', views.post_compra, name='post_compra'),
     path('admin_dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('iniciar_pago/', views.iniciar_pago, name='iniciar_pago'),
+    path('confirmar_pago/', views.confirmar_pago, name='confirmar_pago')
+
 ]

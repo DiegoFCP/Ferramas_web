@@ -1,5 +1,19 @@
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from .models import Producto
+
+from transbank.webpay.webpay_plus.transaction import Transaction
+from transbank.common.integration_type import IntegrationType
+from django.shortcuts import render, redirect
+from django.conf import settings
+
+import uuid
+
+from django.http import HttpResponse
+
+
+
+
 
 def lista_productos(request):
     query = request.GET.get('search')
@@ -53,3 +67,37 @@ def post_compra(request):
 def admin_dashboard(request):
     # Esta vista sería la del dashboard del administrador
     return render(request, 'productos/admin_dashboard.html')
+
+from transbank.webpay.webpay_plus.transaction import Transaction
+
+def iniciar_pago(request):
+    buy_order = "orden12345"
+    session_id = "sesion12345"
+    amount = 95000
+    return_url = request.build_absolute_uri(reverse('confirmar_pago'))
+
+    # Llamada correcta a Transaction.create()
+    response = Transaction().create(
+        buy_order=buy_order,
+        session_id=session_id,
+        amount=amount,
+        return_url=return_url
+    )
+
+    # Redirige al usuario a la URL de pago proporcionada por Transbank
+    return redirect(response['url'] + '?token_ws=' + response['token'])
+
+
+def confirmar_pago(request):
+    # Obtiene el token desde la URL (parámetro 'token_ws')
+    token = request.GET.get("token_ws")
+    
+    if token:
+        # Llamada correcta a Transaction.commit(token)
+        response = Transaction().commit(token)
+        
+        # Muestra la página de confirmación usando post_compra.html
+        return render(request, 'productos/post_compra.html', {'response': response})
+    else:
+        # Muestra la página de error si el token no está presente
+        return render(request, 'productos/error.html', {'error': 'Token no encontrado'})
