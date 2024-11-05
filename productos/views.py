@@ -139,8 +139,20 @@ def remove_from_cart(request, producto_id):
 
 
 def post_compra(request):
-    # Página principal
-    return render(request, 'productos/post_compra.html')
+    # Obtener el carrito y el total desde la sesión
+    cart = request.session.get('cart', [])
+    total = request.session.get('cart_total', 0)
+
+    # Limpiar el carrito de la sesión después de la compra
+    request.session['cart'] = []
+    request.session['cart_total'] = 0
+
+    # Pasar el carrito y el total al contexto de la plantilla
+    return render(request, 'productos/post_compra.html', {
+        'cart': cart,
+        'total': total,
+        'order_number': '123456'  # Genera el número de pedido real si es necesario
+    })
 
 def admin_dashboard(request):
     # Esta vista sería la del dashboard del administrador
