@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .models import Producto
 
@@ -9,8 +9,9 @@ from django.conf import settings
 
 import uuid
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
+from django.http import JsonResponse
 
 
 
@@ -56,9 +57,86 @@ def login_staff(request):
     
     return render(request, 'productos/login_staff.html')
 
+
+def add_to_cart(request, producto_id):
+    producto = get_object_or_404(Producto, id_producto=producto_id)
+    cart = request.session.get("cart", [])
+
+    # Verificar si el producto ya está en el carrito y aumentar la cantidad
+    for item in cart:
+        if item["id_producto"] == producto_id:
+            item["cantidad"] += 1
+            break
+    else:
+        # Si no existe, añadir nuevo
+        cart.append({
+            "id_producto": producto.id_producto,
+            "nombre": producto.nombre,
+            "precio": float(producto.precio),
+            "cantidad": 1
+        })
+
+    request.session["cart"] = cart
+
+    # Responder con JSON si es AJAX
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return JsonResponse({"success": True, "message": "Producto añadido al carrito"})
+
+    return redirect("cart")
+
+from django.shortcuts import render
+
 def cart(request):
-    # Página principal
-    return render(request, 'productos/cart.html')
+    # Obtener el carrito desde la sesión
+    cart = request.session.get('cart', [])
+
+    # Calcular el total y los subtotales
+    total = 0
+    for item in cart:
+        # Asegúrate de que el subtotal sea cantidad * precio
+        item['subtotal'] = item['cantidad'] * item['precio']
+        total += item['subtotal']
+
+    # Guardar el total en la sesión para utilizarlo en la transacción de pago
+    request.session['cart_total'] = total
+
+    # Pasar los datos al contexto de la plantilla
+    return render(request, 'productos/cart.html', {
+        'cart': cart,
+        'total': total,
+    })
+
+
+# Aumentar cantidad
+def increase_quantity(request, producto_id):
+    cart = request.session.get("cart", [])
+    for item in cart:
+        if item["id_producto"] == producto_id:
+            item["cantidad"] += 1
+            break
+    request.session["cart"] = cart
+    return JsonResponse({"success": True, "message": "Cantidad aumentada"})
+
+# Disminuir cantidad
+def decrease_quantity(request, producto_id):
+    cart = request.session.get("cart", [])
+    for item in cart:
+        if item["id_producto"] == producto_id:
+            if item["cantidad"] > 1:
+                item["cantidad"] -= 1
+            else:
+                cart.remove(item)  # Si es la última unidad, se elimina del carrito
+            break
+    request.session["cart"] = cart
+    return JsonResponse({"success": True, "message": "Cantidad disminuida"})
+
+# Eliminar del carrito
+def remove_from_cart(request, producto_id):
+    cart = request.session.get("cart", [])
+    cart = [item for item in cart if item["id_producto"] != producto_id]
+    request.session["cart"] = cart
+    return JsonResponse({"success": True, "message": "Producto eliminado del carrito"})
+
 
 def post_compra(request):
     # Página principal
@@ -71,12 +149,18 @@ def admin_dashboard(request):
 from transbank.webpay.webpay_plus.transaction import Transaction
 
 def iniciar_pago(request):
-    buy_order = "orden12345"
-    session_id = "sesion12345"
-    amount = 95000
+    buy_order = str(uuid.uuid4())[:26]  # Truncamos el UUID a 26 caracteres
+    session_id = str(uuid.uuid4())[:26]
+    amount = request.session.get('cart_total', 0)  # Obtiene el total del carrito de la sesión
+
+    # Verifica si el `amount` es válido
+    if amount <= 0:
+        # Redirige al carrito si el monto no es válido
+        return redirect('cart')
+
     return_url = request.build_absolute_uri(reverse('confirmar_pago'))
 
-    # Llamada correcta a Transaction.create()
+    # Llamada a la API de Transbank
     response = Transaction().create(
         buy_order=buy_order,
         session_id=session_id,
@@ -84,20 +168,11 @@ def iniciar_pago(request):
         return_url=return_url
     )
 
-    # Redirige al usuario a la URL de pago proporcionada por Transbank
     return redirect(response['url'] + '?token_ws=' + response['token'])
-
-
 def confirmar_pago(request):
-    # Obtiene el token desde la URL (parámetro 'token_ws')
     token = request.GET.get("token_ws")
-    
     if token:
-        # Llamada correcta a Transaction.commit(token)
         response = Transaction().commit(token)
-        
-        # Muestra la página de confirmación usando post_compra.html
         return render(request, 'productos/post_compra.html', {'response': response})
     else:
-        # Muestra la página de error si el token no está presente
         return render(request, 'productos/error.html', {'error': 'Token no encontrado'})
