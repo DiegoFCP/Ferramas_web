@@ -1,20 +1,23 @@
+import bcchapi
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .models import Producto
 
 from transbank.webpay.webpay_plus.transaction import Transaction
 from transbank.common.integration_type import IntegrationType
-from django.shortcuts import render, redirect
 from django.conf import settings
 
 import uuid
 
 from django.http import HttpResponse, JsonResponse
 
-from django.http import JsonResponse
+from bcchapi import Siete
+import decimal
+
+from datetime import datetime
 
 
-
+api = Siete("diegocortes.pinilla@gmail.com", "Cuimi199!")
 
 def lista_productos(request):
     query = request.GET.get('search')
@@ -84,26 +87,31 @@ def add_to_cart(request, producto_id):
 
     return redirect("cart")
 
-from django.shortcuts import render
 
 def cart(request):
     # Obtener el carrito desde la sesión
     cart = request.session.get('cart', [])
 
-    # Calcular el total y los subtotales
-    total = 0
+    # Calcular el total en CLP y los subtotales
+    total_clp = 0
     for item in cart:
-        # Asegúrate de que el subtotal sea cantidad * precio
         item['subtotal'] = item['cantidad'] * item['precio']
-        total += item['subtotal']
+        total_clp += item['subtotal']
+    
+    # Obtener el tipo de cambio y calcular el total en USD
+    tipo_cambio = obtener_tipo_cambio()
+    total_usd = total_clp / tipo_cambio if tipo_cambio else None
 
     # Guardar el total en la sesión para utilizarlo en la transacción de pago
-    request.session['cart_total'] = total
+    request.session['cart_total'] = total_clp
 
     # Pasar los datos al contexto de la plantilla
     return render(request, 'productos/cart.html', {
         'cart': cart,
-        'total': total,
+        'total_clp': total_clp,
+        'total_usd': total_usd,
+        'tipo_cambio': tipo_cambio,
+        'error_message': "No se pudo obtener el tipo de cambio en este momento." if not tipo_cambio else None,
     })
 
 
@@ -188,3 +196,27 @@ def confirmar_pago(request):
         return render(request, 'productos/post_compra.html', {'response': response})
     else:
         return render(request, 'productos/error.html', {'error': 'Token no encontrado'})
+
+
+from bcchapi import Siete
+
+def obtener_tipo_cambio():
+    try:
+        # Inicializa la conexión con credenciales
+        siete = bcchapi.Siete("diegocortes.pinilla@gmail.com", "Cuimi199!")
+        
+        # Establece la fecha actual
+        fecha_actual = datetime.today().strftime('%Y-%m-%d')
+        
+        # Realiza la consulta del tipo de cambio
+        tipo_cambio = siete.cuadro(
+            series=["F073.TCO.PRE.Z.D"],
+            nombres=["dolar"],
+            desde=fecha_actual
+        )
+        
+        # Obtiene el último valor del tipo de cambio
+        return tipo_cambio['dolar'].iloc[-1]
+    except Exception as e:
+        print(f"Error al obtener el tipo de cambio: {e}")
+        return None

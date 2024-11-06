@@ -22,6 +22,12 @@
             margin-right: 0;
         }
 
+        /* Estilos para la imagen del producto 3 en la tarjeta */
+        .card-img-top {
+            width: 300px;
+            height: 200px;
+            object-fit: cover;
+        }
     </style>
 </head>
 <body>
@@ -55,15 +61,15 @@
     </nav>
 
     <!-- Banner principal con imagen -->
-    <div class="container mt-5">
-        <div class="row align-items-center product-banner">
-            <div class="col-md-6">
-                <h1>Bienvenido a Ferramas</h1>
-                <p>En Ferramas, encontrarás los mejores productos y herramientas para tus proyectos.</p>
-                <a href="{% url 'lista_productos' %}" class="btn btn-primary btn-lg mt-3">Explorar Catálogo</a>
-            </div>
-            <div class="col-md-6" text-end>
-                <img src="{% static 'imgs/logo/logo.png' %}" alt="Productos Ferramas" class="img-fluid">
+    <div class="container mt-5 promo-banner text-center">
+        <div class="row">
+            <div class="col">
+                <img src="{% static 'imgs/herramientas/banner.jpg' %}" alt="Promoción Ferramas" class="img-fluid rounded">
+                <div class="promo-text mt-3">
+                    <h2>¡Ofertas Exclusivas en Ferramas!</h2>
+                    <p>Aprovecha los mejores descuentos en productos para tus proyectos.</p>
+                    <a href="{% url 'lista_productos' %}" class="btn btn-primary btn-lg mt-3">Explorar Ofertas</a>
+                </div>
             </div>
         </div>
     </div>
@@ -74,30 +80,33 @@
         <div class="row mt-4">
             <div class="col-md-4">
                 <div class="card">
-                    <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Producto 1">
+                    <img src="{% static 'imgs/herramientas/taladro1.jfif' %}" class="card-img-top" alt="Producto 1">
                     <div class="card-body">
-                        <h5 class="card-title">Producto 1</h5>
-                        <p class="card-text">Descripción breve del producto.</p>
+                        <h5 class="card-title">Taladro Bosch</h5>
+                        <p class="card-text">$89.990</p>
+                        <p class="card-text">Taladro de alto rendimiento.</p>
                         <a href="#" class="btn btn-primary">Ver Detalles</a>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card">
-                    <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Producto 2">
+                    <img src="{% static 'imgs/herramientas/cemento1.jfif' %}" class="card-img-top" alt="Producto 2">
                     <div class="card-body">
-                        <h5 class="card-title">Producto 2</h5>
-                        <p class="card-text">Descripción breve del producto.</p>
+                        <h5 class="card-title">Cemento</h5>
+                        <p class="card-text">$7.500</p>
+                        <p class="card-text">Cemento Avellaneda.</p>
                         <a href="#" class="btn btn-primary">Ver Detalles</a>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card">
-                    <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Producto 3">
+                    <img src="{% static 'imgs/herramientas/pintura1.jpeg' %}" class="card-img-top" alt="Producto 3">
                     <div class="card-body">
-                        <h5 class="card-title">Producto 3</h5>
-                        <p class="card-text">Descripción breve del producto.</p>
+                        <h5 class="card-title">Pintura</h5>
+                        <p class="card-text">$12.500</p>
+                        <p class="card-text">Pintura exterior.</p>
                         <a href="#" class="btn btn-primary">Ver Detalles</a>
                     </div>
                 </div>

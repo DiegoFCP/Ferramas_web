@@ -87,11 +87,18 @@
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title">Resumen de la compra</h4>
-                        <p><strong>Total: {{ total }} CLP</strong></p>
-                        {% if cart and total > 0 %}
-                            <a href="{% url 'iniciar_pago' %}" class="btn btn-success w-100">Proceder a la compra</a>
+                        <p id="totalDisplay"><strong>Total en CLP: {{ total_clp }} CLP</strong></p>
+                        {% if total_usd %}
+                        <p id="usdDisplay" style="display:none;"><strong>Total en USD: {{ total_usd|floatformat:2 }} USD</strong></p>
+                        <!-- <small class="text-muted">Tipo de cambio: 1 USD = {{ tipo_cambio|floatformat:2 }} CLP</small> -->
+                        {% else %}
+                        <p>{{ error_message }}</p>
                         {% endif %}
-                        <a href="{% url 'lista_productos' %}" class="btn btn-secondary w-100 mt-3">Seguir comprando</a>
+                        {% if cart %}
+                            <a href="{% url 'iniciar_pago' %}" class="btn btn-success w-100 mt-3">Proceder a la compra</a>
+                        {% endif %}
+                        <!-- Botón para alternar divisas -->
+                        <button id="toggleCurrency" class="btn btn-secondary w-100 mt-2">Ver en USD</button>
                     </div>
                 </div>
             </div>
@@ -133,6 +140,23 @@
                 })
                 .catch(error => console.error("Error:", error));
             });
+        });
+
+        // Lógica para alternar entre CLP y USD
+        const toggleCurrencyButton = document.getElementById("toggleCurrency");
+        const totalCLP = document.getElementById("totalDisplay");
+        const totalUSD = document.getElementById("usdDisplay");
+
+        toggleCurrencyButton.addEventListener("click", function() {
+            if (totalCLP.style.display === "none") {
+                totalCLP.style.display = "block";
+                totalUSD.style.display = "none";
+                toggleCurrencyButton.textContent = "Ver en USD";
+            } else {
+                totalCLP.style.display = "none";
+                totalUSD.style.display = "block";
+                toggleCurrencyButton.textContent = "Ver en CLP";
+            }
         });
     });
 </script>
