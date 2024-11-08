@@ -82,7 +82,7 @@
                 </table>
             </div>
     
-            <!-- Ajuste de margen para el resumen -->
+            <!-- Resumen de la compra con opción de alternar divisa -->
             <div class="col-md-3 ms-md-auto">
                 <div class="card">
                     <div class="card-body">
@@ -90,12 +90,13 @@
                         <p id="totalDisplay"><strong>Total en CLP: {{ total_clp }} CLP</strong></p>
                         {% if total_usd %}
                         <p id="usdDisplay" style="display:none;"><strong>Total en USD: {{ total_usd|floatformat:2 }} USD</strong></p>
-                        <!-- <small class="text-muted">Tipo de cambio: 1 USD = {{ tipo_cambio|floatformat:2 }} CLP</small> -->
+                        <small class="text-muted">Tipo de cambio: 1 USD = {{ tipo_cambio|floatformat:2 }} CLP</small>
                         {% else %}
                         <p>{{ error_message }}</p>
                         {% endif %}
                         {% if cart %}
-                            <a href="{% url 'iniciar_pago' %}" class="btn btn-success w-100 mt-3">Proceder a la compra</a>
+                            <!-- Enlace a iniciar pago con divisa por defecto en CLP -->
+                            <a id="proceedToPurchase" href="{% url 'iniciar_pago' %}?divisa=CLP" class="btn btn-success w-100 mt-3">Proceder a la compra</a>
                         {% endif %}
                         <!-- Botón para alternar divisas -->
                         <button id="toggleCurrency" class="btn btn-secondary w-100 mt-2">Ver en USD</button>
@@ -105,7 +106,6 @@
         </div>
     </div>
     
-
     <!-- Footer -->
     <footer class="bg-dark text-white text-center py-4 mt-5">
         <p>&copy; 2024 Ferramas. Todos los derechos reservados.</p>
@@ -115,15 +115,18 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
+<!-- JavaScript para actualizar el botón de compra según la divisa seleccionada -->
+<!-- JavaScript para actualizar el botón de compra según la divisa seleccionada -->
+<!-- JavaScript para actualizar el botón de compra según la divisa seleccionada -->
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const updateCartButtons = document.querySelectorAll(".update-cart");
-    
+
         updateCartButtons.forEach(button => {
             button.addEventListener("click", function(event) {
                 event.preventDefault();
                 const url = this.getAttribute("data-url");
-    
+
                 fetch(url, {
                     method: "GET",
                     headers: {
@@ -146,19 +149,24 @@
         const toggleCurrencyButton = document.getElementById("toggleCurrency");
         const totalCLP = document.getElementById("totalDisplay");
         const totalUSD = document.getElementById("usdDisplay");
+        const proceedToPurchase = document.getElementById("proceedToPurchase");
 
         toggleCurrencyButton.addEventListener("click", function() {
             if (totalCLP.style.display === "none") {
                 totalCLP.style.display = "block";
                 totalUSD.style.display = "none";
                 toggleCurrencyButton.textContent = "Ver en USD";
+                proceedToPurchase.href = "{% url 'iniciar_pago' %}?divisa=CLP"; // Cambiar a CLP
             } else {
                 totalCLP.style.display = "none";
                 totalUSD.style.display = "block";
                 toggleCurrencyButton.textContent = "Ver en CLP";
+                proceedToPurchase.href = "{% url 'iniciar_pago' %}?divisa=USD"; // Cambiar a USD
             }
         });
     });
 </script>
+
+
     
 </html>

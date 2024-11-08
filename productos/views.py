@@ -12,10 +12,10 @@ import uuid
 from django.http import HttpResponse, JsonResponse
 
 from bcchapi import Siete
-import decimal
 
 from datetime import datetime
 
+from decimal import Decimal, ROUND_DOWN
 
 api = Siete("diegocortes.pinilla@gmail.com", "Cuimi199!")
 
@@ -104,6 +104,7 @@ def cart(request):
 
     # Guardar el total en la sesión para utilizarlo en la transacción de pago
     request.session['cart_total'] = total_clp
+    request.session['cart_total_usd'] = int(total_usd) if total_usd else None
 
     # Pasar los datos al contexto de la plantilla
     return render(request, 'productos/cart.html', {
@@ -168,27 +169,40 @@ def admin_dashboard(request):
 
 from transbank.webpay.webpay_plus.transaction import Transaction
 
+
 def iniciar_pago(request):
+    # Obtiene el parámetro de divisa seleccionado
+    divisa = request.GET.get('divisa', 'CLP')
     buy_order = str(uuid.uuid4())[:26]  # Truncamos el UUID a 26 caracteres
     session_id = str(uuid.uuid4())[:26]
-    amount = request.session.get('cart_total', 0)  # Obtiene el total del carrito de la sesión
 
-    # Verifica si el `amount` es válido
+    # Obtiene el total del carrito de la sesión en CLP o USD
+    if divisa == 'USD':
+        amount = request.session.get('cart_total_usd', 0)  # Usar el total en USD desde la sesión
+    else:
+        amount = request.session.get('cart_total_clp', 0)  # Usar el total en CLP desde la sesión
+
+    # Verifica si el monto es válido
     if amount <= 0:
-        # Redirige al carrito si el monto no es válido
-        return redirect('cart')
+        return redirect('cart')  # Redirige al carrito si el monto no es válido
 
     return_url = request.build_absolute_uri(reverse('confirmar_pago'))
 
     # Llamada a la API de Transbank
-    response = Transaction().create(
-        buy_order=buy_order,
-        session_id=session_id,
-        amount=amount,
-        return_url=return_url
-    )
+    try:
+        response = Transaction().create(
+            buy_order=buy_order,
+            session_id=session_id,
+            amount=amount,
+            return_url=return_url
+        )
+    except Exception as e:
+        # Maneja el error de Transbank aquí
+        print("Error en la transacción:", e)
+        return redirect('cart')  # Redirige al carrito en caso de error
 
     return redirect(response['url'] + '?token_ws=' + response['token'])
+
 def confirmar_pago(request):
     token = request.GET.get("token_ws")
     if token:
