@@ -3,55 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buscar Productos - Ferramas</title>
+    <title>Catálogo de Productos - Ferramas</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     {% load static %}
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-        }
-        .container {
-            margin-top: 50px;
-        }
-        h3 {
-            margin-bottom: 30px;
-        }
-        button {
-            margin: 5px;
-        }
-        .table th, .table td {
-            vertical-align: middle;
-        }
-        .table th {
-            background-color: #343a40;
-            color: #fff;
-        }
-        .table td {
-            background-color: #fff;
-            border-color: #dee2e6;
-        }
-        .home-button {
-            background-color: #6c757d;
-            color: #fff;
-            border-radius: 5px;
-        }
-        .home-button:hover {
-            background-color: #5a6268;
-        }
-        .search-form input[type="text"] {
-            border-radius: 50px;
-            border: 1px solid #ddd;
-            padding: 10px;
-            width: 75%;
-        }
-        .search-form button {
-            border-radius: 50px;
-        }
         .navbar-brand img {
             height: 50px;
             width: auto;
+        }
+
+        .card img {
+            max-height: 200px;
+            object-fit: cover;
+        }
+
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-bar {
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        .btn-secondary{
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -59,7 +40,6 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <!-- Logo de Ferramas con redirección a la página index -->
             <a class="navbar-brand" href="{% url 'index' %}">
                 <img src="{% static 'imgs/logo/logo.png' %}" alt="Logo Ferramas">
             </a>
@@ -69,10 +49,13 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'lista_productos' %}">Explorar Catálogo</a>
+                        <a class="nav-link" href="{% url 'lista_productos' %}">Catálogo</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'login' %}">Iniciar Sesión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login_staff' %}">Staff</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'cart' %}">Carrito</a>
@@ -82,92 +65,45 @@
         </div>
     </nav>
 
-    <!-- Contenido principal de la página -->
+    <!-- Catálogo de productos -->
     <div class="container mt-5">
-        <h3 class="text-center">Catálogo de Productos</h3>
-
-        <!-- Formulario de búsqueda -->
-        <form method="GET" action="{% url 'lista_productos' %}" class="search-form text-center">
-            <input type="text" name="search" placeholder="Buscar producto por nombre" value="{{ request.GET.search }}" class="form-control d-inline-block">
-            <button type="submit" class="btn btn-primary">Buscar</button>
-            <a href="{% url 'lista_productos' %}" class="btn btn-warning">Limpiar búsqueda</a>
-        </form>
-
-        <!-- Botón para mostrar todos los productos -->
-        <div class="text-center mt-3">
-            <form method="GET" action="{% url 'lista_productos' %}">
-                <button type="submit" name="show_all" value="1" class="btn btn-success">Mostrar todos los productos</button>
+        <h2 class="text-center">Explora Nuestro Catálogo</h2>
+        <div class="search-bar text-center">
+            <form method="GET" action="{% url 'lista_productos' %}" class="d-flex">
+                <input type="text" name="search" class="form-control me-2" placeholder="Buscar productos..." value="{{ query }}">
+                <button class="btn btn-primary" type="submit">Buscar</button>
             </form>
+            <div class="mt-2">
+                <a href="?show_all=true" class="btn btn-secondary">Mostrar Todos</a>
+            </div>
         </div>
 
-        <!-- Tabla de productos -->
-        <table class="table table-hover mt-4">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Nombre</th>
-                    <th>Descripción</th>
-                    <th>Precio</th>
-                    <th>Categoría</th>
-                    <th>Acción</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for producto in productos %}
-                <tr>
-                    <td>{{ producto.nombre }}</td>
-                    <td>{{ producto.descripcion }}</td>
-                    <td>{{ producto.precio }} CLP</td>
-                    <td>
-                        {% if producto.categoria %}
-                            {{ producto.categoria.nombre }}
-                        {% else %}
-                            Sin categoría
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="{% url 'add_to_cart' producto.id_producto %}" class="btn btn-primary add-to-cart-button">Agregar al Carrito</a>
-
-                    </td>
-                    
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center">No hay productos disponibles.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="row">
+            {% for producto in productos %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="{{ producto.url_imagen }}" class="card-img-top" alt="{{ producto.nombre }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ producto.nombre }}</h5>
+                        <p class="card-text"><strong>${{ producto.precio }}</strong></p>
+                        <a href="{% url 'add_to_cart' producto.id_producto %}" class="btn btn-success w-100">Agregar al Carrito</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <p class="text-center">No se encontraron productos.</p>
+            </div>
+            {% endfor %}
+        </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-4 mt-5">
+        <p>&copy; 2024 Ferramas. Todos los derechos reservados.</p>
+    </footer>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const addToCartButtons = document.querySelectorAll(".add-to-cart-button");
-    
-        addToCartButtons.forEach(button => {
-            button.addEventListener("click", function(event) {
-                event.preventDefault();
-                const url = this.href;
-    
-                fetch(url, {
-                    method: "GET",
-                    headers: {
-                        "X-Requested-With": "XMLHttpRequest"
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(data.message); // Puedes mejorar esto con una notificación más elegante
-                    }
-                })
-                .catch(error => console.error("Error:", error));
-            });
-        });
-    });
-    </script>
-    
 </html>

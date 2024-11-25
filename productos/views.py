@@ -16,6 +16,7 @@ from bcchapi import Siete
 from datetime import datetime
 
 from decimal import Decimal, ROUND_DOWN
+from django.core.paginator import Paginator
 
 api = Siete("diegocortes.pinilla@gmail.com", "Cuimi199!")
 
@@ -28,10 +29,17 @@ def lista_productos(request):
     elif query:
         productos = Producto.objects.filter(nombre__icontains=query)
     else:
-        productos = []  # Lista vacía cuando no se ha hecho una búsqueda
+        productos = Producto.objects.all()  # Mostrar todos los productos si no hay búsqueda
 
-    return render(request, 'productos/lista_productos.html', {'productos': productos, 'query': query})
+    # Añadir paginación (12 productos por página)
+    paginator = Paginator(productos, 12)
+    page_number = request.GET.get('page')  # Obtener el número de página actual
+    productos_paginados = paginator.get_page(page_number)
 
+    return render(request, 'productos/lista_productos.html', {
+        'productos': productos_paginados,
+        'query': query
+    })
 def index(request):
     # Página principal
     return render(request, 'productos/index.html')
@@ -102,8 +110,8 @@ def cart(request):
     tipo_cambio = obtener_tipo_cambio()
     total_usd = total_clp / tipo_cambio if tipo_cambio else None
 
-    # Guardar el total en la sesión para utilizarlo en la transacción de pago
-    request.session['cart_total'] = total_clp
+    # Guardar ambos totales en la sesión
+    request.session['cart_total_clp'] = total_clp
     request.session['cart_total_usd'] = int(total_usd) if total_usd else None
 
     # Pasar los datos al contexto de la plantilla
@@ -114,7 +122,6 @@ def cart(request):
         'tipo_cambio': tipo_cambio,
         'error_message': "No se pudo obtener el tipo de cambio en este momento." if not tipo_cambio else None,
     })
-
 
 # Aumentar cantidad
 def increase_quantity(request, producto_id):
